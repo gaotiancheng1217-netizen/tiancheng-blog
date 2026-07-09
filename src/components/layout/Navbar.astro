@@ -40,6 +40,7 @@ const navbarBlur =
 
 // 获取导航栏标题，如果没有设置则使用 siteConfig.title
 const navbarTitle = siteConfig.navbar.title || siteConfig.title;
+const mobileNavbarTitle = navbarTitle.replace(/\s*Blog$/i, "");
 
 // 获取导航栏宽度配置
 const navbarWidthFull = siteConfig.navbar.widthFull ?? false;
@@ -114,18 +115,18 @@ if (isLocalSrcLogo) {
                 ? "grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)]"
                 : "grid-cols-[auto_minmax(0,1fr)_auto]"
         ]}>
-            <a href={url('/')} class="btn-plain scale-animation rounded-lg h-13 px-5 font-bold active:scale-95">
+            <a href={url('/')} class="btn-plain scale-animation rounded-lg h-13 px-2 sm:px-5 font-bold active:scale-95 justify-self-start w-fit">
                 <div class:list={[
                     "flex flex-row items-center text-md",
                     siteConfig.navbar.followTheme ? "text-(--primary)" : "dark:text-white text-black"
                 ]} style="font-family: var(--font-navbar-title, inherit)">
                                     {siteConfig.navbar.logo?.type === "icon" ? (
-                                        <Icon is:inline name={siteConfig.navbar.logo.value || "material-symbols:home-pin-outline"} class="text-[1.75rem] mb-1 mr-2" />
+                                        <Icon is:inline name={siteConfig.navbar.logo.value || "material-symbols:home-pin-outline"} class="text-[1.75rem] mb-1 mr-2 flex-shrink-0" />
                                     ) : siteConfig.navbar.logo?.type === "image" && logoImg ? (
                                         <Picture
                                             src={logoImg}
                                             alt={siteConfig.navbar.logo.alt || siteConfig.title}
-                                            class="h-7 w-7 mb-1 mr-2 object-contain"
+                                            class="h-7 w-7 mb-1 mr-2 object-contain flex-shrink-0"
                                             formats={getImageFormats()}
                                             fallbackFormat={getFallbackFormat()}
                                             widths={[28, 56]}
@@ -133,13 +134,14 @@ if (isLocalSrcLogo) {
                                             fetchpriority="high"
                                         />
                                     ) : siteConfig.navbar.logo?.type === "image" ? (
-                                        <img src={url(siteConfig.navbar.logo.value)} alt={siteConfig.navbar.logo.alt || siteConfig.title} class="h-7 w-7 mb-1 mr-2 object-contain" fetchpriority="high" />
+                                        <img src={url(siteConfig.navbar.logo.value)} alt={siteConfig.navbar.logo.alt || siteConfig.title} class="h-7 w-7 mb-1 mr-2 object-contain flex-shrink-0" fetchpriority="high" />
                                     ) : siteConfig.navbar.logo?.type === "url" ? (
-                                        <img src={siteConfig.navbar.logo.value} alt={siteConfig.navbar.logo.alt || siteConfig.title} class="h-7 w-7 mb-1 mr-2 object-contain" fetchpriority="high" />
+                                        <img src={siteConfig.navbar.logo.value} alt={siteConfig.navbar.logo.alt || siteConfig.title} class="h-7 w-7 mb-1 mr-2 object-contain flex-shrink-0" fetchpriority="high" />
                                     ) : (
-                                        <Icon is:inline name="material-symbols:home-pin-outline" class="text-[1.75rem] mb-1 mr-2" />
+                                        <Icon is:inline name="material-symbols:home-pin-outline" class="text-[1.75rem] mb-1 mr-2 flex-shrink-0" />
                                     )}
-                    {navbarTitle}
+                    <span class="hidden sm:inline">{navbarTitle}</span>
+                    <span class="sm:hidden">{mobileNavbarTitle}</span>
                 </div>
             </a>
             <div class:list={[

@@ -2,14 +2,11 @@
 import { readFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import { Icon } from "astro-icon/components";
-import ci from "ci-info";
 import WidgetLayout from "@/components/common/WidgetLayout.astro";
 import { licenseConfig, siteConfig } from "@/config";
 import I18nKey from "@/i18n/i18nKey";
 import { i18n } from "@/i18n/translation";
 import type { WidgetComponentConfig } from "@/types/config";
-import { detectBuildPlatform } from "@/utils/build-platform";
-import { formatDateI18nWithTime } from "@/utils/date-utils";
 
 interface Props {
 	class?: string;
@@ -40,47 +37,13 @@ try {
 	astroVersion = astroPkg.version || "unknown";
 } catch {}
 
-// Node 版本
-const nodeVersion = process.version;
-
-// pnpm 版本（从 npm_config_user_agent 解析）
-let pnpmVersion = "unknown";
-const userAgent = process.env.npm_config_user_agent || "";
-const pnpmMatch = userAgent.match(/pnpm\/([\d.]+)/);
-if (pnpmMatch) {
-	pnpmVersion = `v${pnpmMatch[1]}`;
-}
-
 // 构建时间
-const buildTime = formatDateI18nWithTime(new Date());
+const launchTime = "2026年7月8日";
 
-// 构建平台检测（使用 ci-info 自动识别 CI 环境）
-const unknownBuildPlatform =
-	widgetConfig?.specificConfig?.siteInfo?.unknownBuildPlatform || "Unknown CI";
-const buildPlatform = detectBuildPlatform({
-	env: process.env,
-	isCI: ci.isCI,
-	ciName: ci.name,
-	isDev: import.meta.env.DEV,
-	unknownBuildPlatform,
-});
-
-// 系统信息（平台 + 架构）
-const platformMap: Record<string, string> = {
-	win32: "Windows",
-	darwin: "macOS",
-	linux: "Linux",
-	freebsd: "FreeBSD",
-};
-const archMap: Record<string, string> = {
-	x64: "x86_64",
-	arm64: "ARM64",
-	arm: "ARM",
-	ia32: "x86",
-};
-const osName = platformMap[process.platform] || process.platform;
-const archName = archMap[process.arch] || process.arch;
-const systemInfo = `${osName} / ${archName}`;
+// 当前站点部署环境
+const deployPlatform = "Tencent Cloud Lighthouse";
+const systemInfo = "Ubuntu 24.04 LTS / x86_64";
+const webServerVersion = "v1.24.0";
 
 // 站点域名（去掉协议前缀）
 const siteDomain = siteConfig.site_url
@@ -96,7 +59,7 @@ const mainItems = [
 	{
 		icon: "material-symbols:cloud-outline",
 		label: i18n(I18nKey.siteInfoBuildPlatform),
-		value: buildPlatform,
+		value: deployPlatform,
 	},
 	{
 		icon: "mdi:clover",
@@ -136,19 +99,14 @@ const detailItems: {
 		value: `v${astroVersion}`,
 	},
 	{
-		icon: "fa7-brands:node-js",
-		label: i18n(I18nKey.siteInfoNodeVersion),
-		value: nodeVersion,
-	},
-	{
-		icon: "simple-icons:pnpm",
-		label: i18n(I18nKey.siteInfoPnpmVersion),
-		value: pnpmVersion,
+		icon: "simple-icons:nginx",
+		label: "Nginx",
+		value: webServerVersion,
 	},
 	{
 		icon: "material-symbols:build-outline",
 		label: i18n(I18nKey.siteInfoBuildTime),
-		value: buildTime,
+		value: launchTime,
 		fullWidth: true,
 	},
 	{

@@ -295,13 +295,13 @@ export const zh_CN: Translation = {
 
 	// 站点信息
 	[Key.siteInfo]: "站点信息",
-	[Key.siteInfoBuildTime]: "构建时间",
-	[Key.siteInfoBuildPlatform]: "构建平台",
-	[Key.siteInfoBlogVersion]: "博客版本",
+	[Key.siteInfoBuildTime]: "上线时间",
+	[Key.siteInfoBuildPlatform]: "部署平台",
+	[Key.siteInfoBlogVersion]: "主题版本",
 	[Key.siteInfoAstroVersion]: "Astro",
 	[Key.siteInfoNodeVersion]: "Node",
 	[Key.siteInfoPnpmVersion]: "pnpm",
-	[Key.siteInfoSystem]: "系统信息",
+	[Key.siteInfoSystem]: "操作系统",
 	[Key.siteInfoExpand]: "展开构建信息",
 	[Key.siteInfoCollapse]: "收起构建信息",
 	[Key.siteInfoDomain]: "站点域名",
