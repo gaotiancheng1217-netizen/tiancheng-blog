@@ -15,8 +15,7 @@ export const siteConfig: SiteConfig = {
 	site_url: "https://tiancheng-blog.com",
 
 	// 站点描述
-	description:
-		"TianCheng的个人小站。",
+	description: "TianCheng的个人小站。",
 
 	// 站点关键词
 	keywords: [
