@@ -9,9 +9,9 @@ author: "TianCheng"
 draft: false
 ---
 
-这是一篇事件记录，不是完整教程。重点记录一次公网服务器上遇到的异常访问现象，以及从日志、DNS、WHOIS、Nginx 配置几个角度逐步确认和处理问题的过程。
+这是一篇事件记录。主要记录一次公网服务器上遇到的异常访问现象，以及从日志、DNS、WHOIS、Nginx 配置几个角度逐步确认和处理问题的过程。
 
-## 事件现象
+## 事件起因
 
 在查看 Nginx `access.log` 时，发现日志中出现了一个陌生 Referer：
 
@@ -331,7 +331,7 @@ www.xinlanting.com 仍然解析到服务器 IP
 拒绝未知 Host
 ```
 
-相比追查“是谁把域名指过来”，更有效的做法是先在服务器侧关闭这个入口。
+有效的做法是在服务器侧关闭这个入口。
 
 ## 后续观察
 
@@ -368,6 +368,4 @@ awk '{print $11}' /var/log/nginx/access.log | sort | uniq -c | sort -nr | head
 6. WHOIS 可以查注册商和投诉邮箱，但通常查不到真实注册人。
 7. Nginx 应该限制 Host，避免未知域名命中默认站点。
 8. 修改 Nginx 配置后必须先 `nginx -t`，再 reload。
-
-这类事件本身不复杂，但它把 DNS、Nginx、HTTPS、日志分析和基础安全串在了一起，是一个很典型的公网 Web 服务运维案例。
 
