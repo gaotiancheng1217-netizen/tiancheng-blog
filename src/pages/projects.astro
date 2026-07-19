@@ -1,0 +1,172 @@
+---
+import { Icon } from "astro-icon/components";
+import MainGridLayout from "@/layouts/MainGridLayout.astro";
+
+const project = {
+	name: "ServerSentinel",
+	subtitle: "轻量级服务器巡检与 Nginx 日志分析工具",
+	status: "进行中",
+	progress: 45,
+	updatedAt: "2026-07-19",
+	description:
+		"这是一个面向 Linux 运维 / SRE 入门方向的实践项目，用 Shell、Python、Nginx 日志分析、定时任务和自动化测试，逐步构建可复用的服务器巡检工具。",
+	highlights: [
+		"Shell 健康检查脚本已完成基础版本",
+		"Nginx access.log 分析脚本已完成第一版",
+		"已加入固定样本日志与自动测试",
+		"已接入 GitHub Actions 自动检查 Shell 脚本",
+	],
+	completedStages: [
+		{
+			name: "v1：Shell 服务器健康检查",
+			items: [
+				"检查网站 HTTP 状态码",
+				"检查 Nginx 服务状态",
+				"检查磁盘与内存使用情况",
+				"输出巡检日志",
+				"通过 crontab 定时执行",
+			],
+		},
+		{
+			name: "v2：Nginx 日志分析",
+			items: [
+				"统计访问总量",
+				"统计 HTTP 状态码分布",
+				"统计访问最多的 IP",
+				"统计 404 高频路径",
+				"识别 .php、wp-content、admin、.env、.git 等扫描特征",
+				"统计 Referer 来源",
+				"使用测试日志验证分析结果",
+			],
+		},
+	],
+	nextStages: [
+		"v3：使用 Python 生成 Markdown 巡检报告",
+		"v4：使用 Docker 封装工具运行环境",
+		"v5：加入 AI 日志分析助手，生成排障建议",
+	],
+	skills: [
+		"Linux",
+		"Shell",
+		"Nginx",
+		"日志分析",
+		"crontab",
+		"GitHub Actions",
+		"Python",
+		"Docker",
+	],
+};
+---
+
+<MainGridLayout title="项目" description="TianCheng 的项目实践与阶段进度">
+	<section class="card-base overflow-hidden rounded-(--radius-large)">
+		<div class="relative px-7 py-7 sm:px-9 sm:py-8">
+			<div class="absolute top-0 left-0 h-full w-1.5 bg-(--primary)"></div>
+
+			<div class="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
+				<div class="min-w-0">
+					<div class="mb-3 flex flex-wrap items-center gap-3">
+						<span class="inline-flex items-center gap-1.5 rounded-full bg-(--btn-regular-bg) px-3 py-1 text-sm text-(--primary)">
+							<Icon name="material-symbols:construction-rounded" class="text-lg" />
+							项目实践
+						</span>
+						<span class="inline-flex items-center gap-1.5 rounded-full bg-(--btn-regular-bg) px-3 py-1 text-sm text-neutral-500 dark:text-neutral-400">
+							<Icon name="material-symbols:update-rounded" class="text-lg" />
+							更新于 {project.updatedAt}
+						</span>
+					</div>
+
+					<h1 class="text-3xl font-bold leading-tight text-neutral-900 sm:text-4xl dark:text-neutral-50">
+						{project.name}
+					</h1>
+					<p class="mt-2 text-lg font-medium text-neutral-600 dark:text-neutral-300">
+						{project.subtitle}
+					</p>
+					<p class="mt-5 max-w-4xl text-base leading-8 text-neutral-600 dark:text-neutral-300">
+						{project.description}
+					</p>
+				</div>
+
+				<div class="w-full shrink-0 rounded-3xl bg-(--btn-regular-bg) p-5 lg:w-64">
+					<div class="mb-3 flex items-center justify-between">
+						<span class="text-sm text-neutral-500 dark:text-neutral-400">当前状态</span>
+						<span class="rounded-full bg-(--primary) px-3 py-1 text-sm font-semibold text-white">
+							{project.status}
+						</span>
+					</div>
+					<div class="mb-2 flex items-end justify-between">
+						<span class="text-sm text-neutral-500 dark:text-neutral-400">阶段进度</span>
+						<span class="text-2xl font-bold text-(--primary)">{project.progress}%</span>
+					</div>
+					<div class="h-3 overflow-hidden rounded-full bg-white/70 dark:bg-black/20">
+						<div class="h-full rounded-full bg-(--primary)" style={`width: ${project.progress}%`}></div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<section class="mt-6 grid gap-5 lg:grid-cols-2">
+		<div class="card-base rounded-(--radius-large) p-7">
+			<h2 class="mb-5 flex items-center gap-2 text-2xl font-bold">
+				<Icon name="material-symbols:check-circle-rounded" class="text-(--primary)" />
+				已完成能力
+			</h2>
+			<ul class="space-y-3 text-neutral-600 dark:text-neutral-300">
+				{project.highlights.map((item) => (
+					<li class="flex gap-3">
+						<span class="mt-2 h-2 w-2 shrink-0 rounded-full bg-(--primary)"></span>
+						<span>{item}</span>
+					</li>
+				))}
+			</ul>
+		</div>
+
+		<div class="card-base rounded-(--radius-large) p-7">
+			<h2 class="mb-5 flex items-center gap-2 text-2xl font-bold">
+				<Icon name="material-symbols:school-rounded" class="text-(--primary)" />
+				训练方向
+			</h2>
+			<div class="flex flex-wrap gap-2">
+				{project.skills.map((skill) => (
+					<span class="rounded-xl bg-(--btn-regular-bg) px-3 py-2 text-sm font-medium text-neutral-600 dark:text-neutral-300">
+						{skill}
+					</span>
+				))}
+			</div>
+		</div>
+	</section>
+
+	<section class="mt-6 grid gap-5 xl:grid-cols-2">
+		{project.completedStages.map((stage) => (
+			<div class="card-base rounded-(--radius-large) p-7">
+				<h2 class="mb-5 text-2xl font-bold">{stage.name}</h2>
+				<ul class="space-y-3 text-neutral-600 dark:text-neutral-300">
+					{stage.items.map((item) => (
+						<li class="flex gap-3">
+							<Icon name="material-symbols:done-rounded" class="mt-0.5 shrink-0 text-xl text-(--primary)" />
+							<span>{item}</span>
+						</li>
+					))}
+				</ul>
+			</div>
+		))}
+	</section>
+
+	<section class="mt-6 card-base rounded-(--radius-large) p-7">
+		<h2 class="mb-5 flex items-center gap-2 text-2xl font-bold">
+			<Icon name="material-symbols:rocket-launch-rounded" class="text-(--primary)" />
+			下一阶段计划
+		</h2>
+		<div class="grid gap-4 md:grid-cols-3">
+			{project.nextStages.map((stage, index) => (
+				<div class="rounded-2xl bg-(--btn-regular-bg) p-5">
+					<div class="mb-3 flex h-9 w-9 items-center justify-center rounded-full bg-(--primary) font-bold text-white">
+						{index + 3}
+					</div>
+					<p class="leading-7 text-neutral-600 dark:text-neutral-300">{stage}</p>
+				</div>
+			))}
+		</div>
+	</section>
+</MainGridLayout>

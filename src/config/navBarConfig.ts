@@ -33,6 +33,9 @@ const getDynamicNavBarConfig = (): NavBarConfig => {
 		],
 	});
 
+	// 项目
+	links.push(LinkPresets.Projects);
+
 	// 友链
 	links.push(LinkPresets.Friends);
 
@@ -79,6 +82,11 @@ export const LinkPresets: Record<string, NavBarLink> = {
 		name: "标签",
 		url: "/tags/",
 		icon: "material-symbols:tag-rounded",
+	},
+	Projects: {
+		name: "项目",
+		url: "/projects/",
+		icon: "material-symbols:dashboard-customize",
 	},
 	Friends: {
 		name: "友链",
