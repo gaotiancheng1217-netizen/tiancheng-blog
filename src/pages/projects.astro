@@ -1,7 +1,13 @@
 ---
 import { Icon } from "astro-icon/components";
-import { projects } from "@/config/projectsConfig";
+import { getCollection } from "astro:content";
 import MainGridLayout from "@/layouts/MainGridLayout.astro";
+
+const projectEntries = (await getCollection("projects"))
+	.filter((project) => !project.data.draft)
+	.sort((a, b) => b.data.updated.getTime() - a.data.updated.getTime());
+
+const formatDate = (date: Date) => date.toISOString().slice(0, 10);
 ---
 
 <MainGridLayout title="项目" description="TianCheng 的项目实践与阶段进度">
@@ -21,7 +27,7 @@ import MainGridLayout from "@/layouts/MainGridLayout.astro";
 	</section>
 
 	<section class="mt-6 grid gap-5">
-		{projects.map((project) => (
+		{projectEntries.map((project) => (
 			<article class="card-base group overflow-hidden rounded-(--radius-large) transition hover:-translate-y-1 hover:shadow-lg">
 				<div class="relative px-7 py-7 sm:px-9 sm:py-8">
 					<div class="absolute top-0 left-0 h-full w-1.5 bg-(--primary)"></div>
@@ -35,18 +41,18 @@ import MainGridLayout from "@/layouts/MainGridLayout.astro";
 								</span>
 								<span class="inline-flex items-center gap-1.5 rounded-full bg-(--btn-regular-bg) px-3 py-1 text-sm text-neutral-500 dark:text-neutral-400">
 									<Icon name="material-symbols:update-rounded" class="text-lg" />
-									更新于 {project.updatedAt}
+									更新于 {formatDate(project.data.updated)}
 								</span>
 							</div>
 
 							<h2 class="text-3xl font-bold leading-tight text-neutral-900 sm:text-4xl dark:text-neutral-50">
-								{project.name}
+								{project.data.name}
 							</h2>
 							<p class="mt-2 text-lg font-medium text-neutral-600 dark:text-neutral-300">
-								{project.subtitle}
+								{project.data.subtitle}
 							</p>
 							<p class="mt-5 max-w-4xl text-base leading-8 text-neutral-600 dark:text-neutral-300">
-								{project.description}
+								{project.data.description}
 							</p>
 						</div>
 
@@ -54,21 +60,21 @@ import MainGridLayout from "@/layouts/MainGridLayout.astro";
 							<div class="mb-3 flex items-center justify-between">
 								<span class="text-sm text-neutral-500 dark:text-neutral-400">当前状态</span>
 								<span class="rounded-full bg-(--primary) px-3 py-1 text-sm font-semibold text-white">
-									{project.status}
+									{project.data.status}
 								</span>
 							</div>
 							<div class="mb-2 flex items-end justify-between">
 								<span class="text-sm text-neutral-500 dark:text-neutral-400">阶段进度</span>
-								<span class="text-2xl font-bold text-(--primary)">{project.progress}%</span>
+								<span class="text-2xl font-bold text-(--primary)">{project.data.progress}%</span>
 							</div>
 							<div class="h-3 overflow-hidden rounded-full bg-white/70 dark:bg-black/20">
-								<div class="h-full rounded-full bg-(--primary)" style={`width: ${project.progress}%`}></div>
+								<div class="h-full rounded-full bg-(--primary)" style={`width: ${project.data.progress}%`}></div>
 							</div>
 						</div>
 					</div>
 
 					<div class="mt-6 flex flex-wrap gap-2">
-						{project.skills.slice(0, 8).map((skill) => (
+						{project.data.skills.slice(0, 8).map((skill) => (
 							<span class="rounded-xl bg-(--btn-regular-bg) px-3 py-2 text-sm font-medium text-neutral-600 dark:text-neutral-300">
 								{skill}
 							</span>
@@ -77,15 +83,15 @@ import MainGridLayout from "@/layouts/MainGridLayout.astro";
 
 					<div class="mt-6 flex flex-wrap items-center gap-3">
 						<a
-							href={`/projects/${project.slug}/`}
+							href={`/projects/${project.id}/`}
 							class="inline-flex items-center gap-2 rounded-xl bg-(--primary) px-4 py-2 font-medium text-white transition hover:opacity-90"
 						>
 							查看项目详情
 							<Icon name="material-symbols:arrow-forward-rounded" class="transition group-hover:translate-x-1" />
 						</a>
-						{project.repositoryUrl && (
+						{project.data.repositoryUrl && (
 							<a
-								href={project.repositoryUrl}
+								href={project.data.repositoryUrl}
 								target="_blank"
 								rel="noopener noreferrer"
 								class="inline-flex items-center gap-2 rounded-xl bg-(--btn-regular-bg) px-4 py-2 font-medium text-neutral-600 transition hover:text-(--primary) dark:text-neutral-300"

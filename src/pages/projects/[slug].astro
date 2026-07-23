@@ -1,19 +1,25 @@
 ---
+import { getCollection, render, type CollectionEntry } from "astro:content";
 import { Icon } from "astro-icon/components";
-import { projects, type ProjectItem } from "@/config/projectsConfig";
 import MainGridLayout from "@/layouts/MainGridLayout.astro";
 
-export function getStaticPaths() {
-	return projects.map((project) => ({
-		params: { slug: project.slug },
+export async function getStaticPaths() {
+	const projectEntries = (await getCollection("projects")).filter(
+		(project) => !project.data.draft,
+	);
+
+	return projectEntries.map((project) => ({
+		params: { slug: project.id },
 		props: { project },
 	}));
 }
 
-const { project } = Astro.props as { project: ProjectItem };
+const { project } = Astro.props as { project: CollectionEntry<"projects"> };
+const { Content } = await render(project);
+const formatDate = (date: Date) => date.toISOString().slice(0, 10);
 ---
 
-<MainGridLayout title={project.name} description={project.description}>
+<MainGridLayout title={project.data.name} description={project.data.description}>
 	<section class="card-base overflow-hidden rounded-(--radius-large)">
 		<div class="relative px-7 py-7 sm:px-9 sm:py-8">
 			<div class="absolute top-0 left-0 h-full w-1.5 bg-(--primary)"></div>
@@ -32,22 +38,22 @@ const { project } = Astro.props as { project: ProjectItem };
 						</span>
 						<span class="inline-flex items-center gap-1.5 rounded-full bg-(--btn-regular-bg) px-3 py-1 text-sm text-neutral-500 dark:text-neutral-400">
 							<Icon name="material-symbols:update-rounded" class="text-lg" />
-							更新于 {project.updatedAt}
+							更新于 {formatDate(project.data.updated)}
 						</span>
 					</div>
 
 					<h1 class="text-3xl font-bold leading-tight text-neutral-900 sm:text-4xl dark:text-neutral-50">
-						{project.name}
+						{project.data.name}
 					</h1>
 					<p class="mt-2 text-lg font-medium text-neutral-600 dark:text-neutral-300">
-						{project.subtitle}
+						{project.data.subtitle}
 					</p>
 					<p class="mt-5 max-w-4xl text-base leading-8 text-neutral-600 dark:text-neutral-300">
-						{project.description}
+						{project.data.description}
 					</p>
-					{project.repositoryUrl && (
+					{project.data.repositoryUrl && (
 						<a
-							href={project.repositoryUrl}
+							href={project.data.repositoryUrl}
 							target="_blank"
 							rel="noopener noreferrer"
 							class="mt-5 inline-flex items-center gap-2 rounded-xl bg-(--primary) px-4 py-2 font-medium text-white transition hover:opacity-90"
@@ -62,15 +68,15 @@ const { project } = Astro.props as { project: ProjectItem };
 					<div class="mb-3 flex items-center justify-between">
 						<span class="text-sm text-neutral-500 dark:text-neutral-400">当前状态</span>
 						<span class="rounded-full bg-(--primary) px-3 py-1 text-sm font-semibold text-white">
-							{project.status}
+							{project.data.status}
 						</span>
 					</div>
 					<div class="mb-2 flex items-end justify-between">
 						<span class="text-sm text-neutral-500 dark:text-neutral-400">阶段进度</span>
-						<span class="text-2xl font-bold text-(--primary)">{project.progress}%</span>
+						<span class="text-2xl font-bold text-(--primary)">{project.data.progress}%</span>
 					</div>
 					<div class="h-3 overflow-hidden rounded-full bg-white/70 dark:bg-black/20">
-						<div class="h-full rounded-full bg-(--primary)" style={`width: ${project.progress}%`}></div>
+						<div class="h-full rounded-full bg-(--primary)" style={`width: ${project.data.progress}%`}></div>
 					</div>
 				</div>
 			</div>
@@ -83,7 +89,7 @@ const { project } = Astro.props as { project: ProjectItem };
 				<h2 class="mb-6 text-2xl font-bold text-neutral-900 sm:text-3xl dark:text-neutral-50">
 					项目描述
 				</h2>
-				<p>{project.projectDescription}</p>
+				<p>{project.data.projectDescription}</p>
 			</div>
 
 			<div>
@@ -91,7 +97,7 @@ const { project } = Astro.props as { project: ProjectItem };
 					主要工作
 				</h2>
 				<ul class="list-disc space-y-3 pl-6 marker:text-neutral-400">
-					{project.mainWork.map((item) => (
+					{project.data.mainWork.map((item) => (
 						<li>{item}</li>
 					))}
 				</ul>
@@ -101,8 +107,14 @@ const { project } = Astro.props as { project: ProjectItem };
 				<h2 class="mb-6 text-2xl font-bold text-neutral-900 sm:text-3xl dark:text-neutral-50">
 					项目成果
 				</h2>
-				<p>{project.projectResult}</p>
+				<p>{project.data.projectResult}</p>
 			</div>
+		</div>
+	</section>
+
+	<section class="mt-6 card-base rounded-(--radius-large) p-7 sm:p-9">
+		<div class="prose prose-neutral max-w-none dark:prose-invert">
+			<Content />
 		</div>
 	</section>
 
@@ -113,7 +125,7 @@ const { project } = Astro.props as { project: ProjectItem };
 				已完成能力
 			</h2>
 			<ul class="space-y-3 text-neutral-600 dark:text-neutral-300">
-				{project.highlights.map((item) => (
+				{project.data.highlights.map((item) => (
 					<li class="flex gap-3">
 						<span class="mt-2 h-2 w-2 shrink-0 rounded-full bg-(--primary)"></span>
 						<span>{item}</span>
@@ -128,7 +140,7 @@ const { project } = Astro.props as { project: ProjectItem };
 				训练方向
 			</h2>
 			<div class="flex flex-wrap gap-2">
-				{project.skills.map((skill) => (
+				{project.data.skills.map((skill) => (
 					<span class="rounded-xl bg-(--btn-regular-bg) px-3 py-2 text-sm font-medium text-neutral-600 dark:text-neutral-300">
 						{skill}
 					</span>
@@ -138,7 +150,7 @@ const { project } = Astro.props as { project: ProjectItem };
 	</section>
 
 	<section class="mt-6 grid gap-5 xl:grid-cols-2">
-		{project.completedStages.map((stage) => (
+		{project.data.completedStages.map((stage) => (
 			<div class="card-base rounded-(--radius-large) p-7">
 				<h2 class="mb-5 text-2xl font-bold">{stage.name}</h2>
 				<ul class="space-y-3 text-neutral-600 dark:text-neutral-300">
@@ -159,7 +171,7 @@ const { project } = Astro.props as { project: ProjectItem };
 			下一阶段计划
 		</h2>
 		<div class="grid gap-4 md:grid-cols-3">
-			{project.nextStages.map((stage, index) => (
+			{project.data.nextStages.map((stage, index) => (
 				<div class="rounded-2xl bg-(--btn-regular-bg) p-5">
 					<div class="mb-3 flex h-9 w-9 items-center justify-center rounded-full bg-(--primary) font-bold text-white">
 						{index + 3}

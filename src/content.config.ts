@@ -36,7 +36,36 @@ const specCollection = defineCollection({
 	schema: z.object({}),
 });
 
+const projectsCollection = defineCollection({
+	loader: glob({ pattern: "**/*.{md,mdx}", base: "./src/content/projects" }),
+	schema: z.object({
+		name: z.string(),
+		subtitle: z.string(),
+		status: z.string(),
+		progress: z.number().min(0).max(100),
+		updated: z.date(),
+		repositoryUrl: z.string().optional(),
+		description: z.string(),
+		projectDescription: z.string(),
+		mainWork: z.array(z.string()).default([]),
+		projectResult: z.string(),
+		highlights: z.array(z.string()).default([]),
+		completedStages: z
+			.array(
+				z.object({
+					name: z.string(),
+					items: z.array(z.string()).default([]),
+				}),
+			)
+			.default([]),
+		nextStages: z.array(z.string()).default([]),
+		skills: z.array(z.string()).default([]),
+		draft: z.boolean().optional().default(false),
+	}),
+});
+
 export const collections = {
 	posts: postsCollection,
 	spec: specCollection,
+	projects: projectsCollection,
 };
