@@ -2,7 +2,7 @@
 title: "ServerSentinel 项目开发复盘：从服务器巡检到 AI 日志分析"
 published: 2026-07-25
 updated: 2026-07-25
-description: "记录 ServerSentinel 轻量级服务器巡检项目的开发过程，包括 Shell 健康检查、Nginx 日志分析、Python 报告生成、Docker 化运行、结构化异常提取、DeepSeek AI 分析、定时流水线和自动化测试。"
+description: "记录 ServerSentinel 轻量级服务器巡检项目的开发过程，包括 Shell 健康检查、Nginx 日志分析、Python 报告生成、Docker 化运行、结构化异常提取、AI 分析、数据脱敏、Webhook 通知、Dashboard 展示、定时流水线和自动化测试。"
 tags:
   [
     "项目复盘",
@@ -22,7 +22,7 @@ draft: false
 
 这是一篇小工具开发的复盘，用来记录 ServerSentinel 从一个简单想法逐步变成可运行工具的过程。
 
-此工具主要作用是把服务器巡检、日志分析、定时任务、报告生成、容器化运行、异常结构化提取、AI 辅助分析、定时流水线和自动化验证串在一起。
+此工具主要作用是把服务器巡检、日志分析、定时任务、报告生成、容器化运行、异常结构化提取、AI 辅助分析、数据脱敏、风险通知、Dashboard 展示、定时流水线和自动化验证串在一起。
 
 ![ServerSentinel 整体处理流程](/assets/images/projects/server-sentinel/flow.svg)
 
@@ -41,6 +41,9 @@ ServerSentinel 的目标是做一个轻量级服务器巡检与日志分析工�
 - 将异常日志整理为结构化 JSON；
 - 基于 DeepSeek API 生成可复核的 AI 分析报告；
 - 使用一键流水线串联日报、异常提取、AI 分析和 Markdown 报告；
+- 在发送 AI 前对敏感信息进行脱敏；
+- 按风险阈值发送 Webhook 通知；
+- 使用只读 Dashboard 展示巡检和日志分析结果；
 - 通过 cron 和外置环境文件支持 Linux 服务器定时运行；
 - 使用自动化测试确保脚本修改后不会破坏原有功能。
 
@@ -322,6 +325,60 @@ AI 服务不会在普通 `docker compose run report-generator` 时自动启动�
 
 这一阶段的重点不是新增某一个单点功能，而是把已经完成的模块整理成可定时、可部署、可验证的运行链路。
 
+## 第十一阶段：脱敏、多 Provider、通知与 Dashboard 展示
+
+完成 AI 巡检流水线后，项目继续补齐几个工程边界：外部 AI 调用前的数据脱敏、不同模型服务的配置抽象、风险通知，以及面向结果查看的只读 Dashboard。
+
+新增的关键文件包括：
+
+```text
+src/redact_sensitive_data.py
+src/ai_providers.py
+src/send_notification.py
+src/analyze_nginx_log.py
+src/serve_dashboard.py
+dashboard/index.html
+dashboard/app.js
+dashboard/styles.css
+tests/test_security_and_providers.py
+tests/test_nginx_json_and_dashboard.py
+```
+
+`src/redact_sensitive_data.py` 负责在异常数据发送给外部 AI 前进行脱敏。当前会处理 URL、邮箱、IPv4、主机名和 Linux 绝对路径，并把它们替换为本次运行内稳定的占位符，例如：
+
+```text
+<URL_1>
+<IP_1>
+<PATH_1>
+```
+
+原始日志和本地异常 JSON 不会被改写，只有发送给 AI 的副本会被脱敏。这样既保留了本地排查所需的原始信息，也减少了向外部服务发送内部信息的范围。
+
+`src/ai_providers.py` 把 AI 服务配置抽象成统一入口。当前支持：
+
+- DeepSeek；
+- OpenAI；
+- 自定义 OpenAI-compatible 服务。
+
+无论底层使用哪个 Provider，前面的异常 JSON、Prompt 和响应 JSON Schema 都保持一致。这样可以把“日志如何整理”和“调用哪个模型服务”分开，避免业务逻辑和厂商配置混在一起。
+
+`src/send_notification.py` 负责按风险阈值发送通知。当前支持 generic、Slack 和 Discord Webhook 格式。通知内容只包含总体风险、摘要、Finding 数量和本地报告路径，不发送原始日志。
+
+Dashboard 部分由 `src/analyze_nginx_log.py`、`src/serve_dashboard.py` 和 `dashboard/` 目录组成。`src/analyze_nginx_log.py` 会生成前端可读取的 Nginx JSON 统计数据，Dashboard 页面再展示：
+
+- 巡检概览；
+- 异常列表；
+- AI 风险等级；
+- 排查步骤；
+- HTTP 状态码分布；
+- Top IP。
+
+Dashboard 使用原生 HTML、CSS 和 JavaScript，不依赖数据库，也不需要前端构建工具。它是只读展示层，不负责修改服务器配置、不执行远程命令，也没有登录系统；如果后续部署到公网环境，需要额外增加认证或访问控制。
+
+这一阶段补充了自动化测试，覆盖数据脱敏、Provider 配置、Webhook、Nginx JSON 统计和 Dashboard 数据加载。当前项目测试数量已经扩展到 37 个 Python 测试，测试过程使用本地假客户端或离线响应，不依赖真实 API Key，也不会访问外部网络。
+
+这一阶段需要记住的边界是：脱敏可以降低信息泄露风险，但不能保证识别所有业务特有秘密；AI 输出适合作为辅助排查材料，不应直接替代人工确认；Dashboard 是展示层，不应直接暴露成无认证的公网管理入口。
+
 ## 开发过程中遇到的问题
 
 ### 1. 日志里出现大量陌生路径
@@ -450,20 +507,25 @@ Shell 很适合快速完成任务，但如果没有结构，脚本会很快变�
 - JSON Schema 可以约束 AI 返回结构，避免后续程序处理不稳定输出；
 - Prompt 需要明确区分“可信指令”和“不可信日志数据”；
 - API Key 应通过环境变量读取，不应写入代码、配置文件或 Git 仓库；
+- 发送外部 AI 服务前应先进行敏感信息脱敏，减少 URL、IP、主机名、邮箱和路径等信息直接外发；
+- Provider 抽象可以把 DeepSeek、OpenAI 和自定义 OpenAI-compatible 服务统一到同一套输入输出流程中；
 - AI 分析结果应保留人工复核边界，避免把模型输出直接当作操作指令；
 - 一键流水线适合把多个稳定步骤串成固定执行流程，减少手动漏步骤；
 - `flock` 可以防止定时任务重叠执行，避免多个巡检任务同时写同一批报告；
 - 生产环境密钥应放在仓库外部，例如 `/etc/server-sentinel/server-sentinel.env`；
 - 配置文件权限应尽量收紧，例如只允许文件所有者读取和修改；
 - Docker Compose profile 可以把普通任务和 AI API 任务分开，避免误触发外部服务调用；
+- Webhook 通知适合传递风险摘要和报告路径，不适合直接发送完整原始日志；
+- Dashboard 可以作为巡检结果的只读展示层，但没有认证时不应直接暴露到公网；
+- 前端展示数据可以由 Python 生成 JSON，再由浏览器端 JavaScript 读取和渲染；
 - 部署文档应记录依赖安装、密钥配置、定时任务、手动验证和只读排查命令；
 - 测试样本可以让脚本修改更安全；
-- GitHub Actions 可以在代码提交后自动执行 Shell、Python 和 Docker 检查；
+- GitHub Actions 可以在代码提交后自动执行 Shell、Python、Docker、AI 流水线和 Dashboard 数据加载检查；
 - 运维开发的核心不是写一次命令，而是把流程沉淀成可复用工具。
 
 ## 项目阶段总结
 
-目前 ServerSentinel 已经完成了七个主要能力：
+目前 ServerSentinel 已经完成了八个主要能力：
 
 ```text
 Shell 健康检查
@@ -473,16 +535,17 @@ Docker 化报告生成器
 结构化异常提取
 DeepSeek AI 日志分析与 Markdown 报告生成
 一键 AI 巡检流水线与 Linux 定时部署
+脱敏、多 Provider、Webhook 通知与只读 Dashboard
 ```
 
-同时，项目已经接入自动化测试流程，能够在提交代码后自动检查 Shell、Python、Docker、AI 分析和流水线编排相关功能。
+同时，项目已经接入自动化测试流程，能够在提交代码后自动检查 Shell、Python、Docker、AI 分析、数据脱敏、Provider 配置、Webhook、Nginx JSON、Dashboard 数据加载和流水线编排相关功能。
 
 后续可以继续往几个方向推进：
 
-- 增加 Dashboard 页面，展示巡检概览、异常列表、AI 分析结果和日志统计；
-- 增加邮件、企业微信或 Telegram 通知；
+- 补充真实运行截图和示例报告；
+- 增加部署环境的实际运行记录和异常案例复盘；
+- 根据真实使用情况优化 Dashboard 交互、报告字段和异常分类规则；
+- 视需要增加身份认证或内网访问控制，避免 Dashboard 暴露到公网；
 - 接入更完整的监控指标；
-- 增加敏感信息脱敏流程；
-- 抽象 AI Provider 配置，在保持输入输出结构不变的情况下替换不同模型服务。
 
-回头看这个项目，它把 Linux 命令、Shell、Nginx 日志、Python、Docker、CI、AI 辅助分析和定时部署串成了一个实际流程。它不是单个知识点的堆叠，而是围绕“服务器状态如何被检查、记录、分析、封装、验证、辅助解释和周期性运行”这个问题逐步展开的。
+回头看这个项目，它把 Linux 命令、Shell、Nginx 日志、Python、Docker、CI、AI 辅助分析、数据脱敏、风险通知、Dashboard 展示和定时部署串成了一个实际流程。它不是单个知识点的堆叠，而是围绕“服务器状态如何被检查、记录、分析、封装、验证、辅助解释、展示和周期性运行”这个问题逐步展开的。

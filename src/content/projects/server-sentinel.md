@@ -1,12 +1,12 @@
 ---
 name: "ServerSentinel"
 subtitle: "轻量级服务器巡检与 Nginx 日志分析工具"
-status: "进行中"
-progress: 98
+status: "阶段完成"
+progress: 100
 updated: 2026-07-25
 repositoryUrl: "https://github.com/gaotiancheng1217-netizen/server-sentinel"
-description: "基于 Shell、Python、Nginx 日志分析、定时任务、Docker 和自动化测试构建的轻量级服务器巡检、日报生成与异常结构化分析工具。"
-projectDescription: "基于 Shell、Python、Docker 与 Linux 运维工具链构建一套轻量级服务器巡检与日志分析工具，覆盖网站可用性检查、Nginx 服务状态检查、系统资源巡检、Nginx access.log 分析、异常请求识别、Markdown 巡检日报生成、容器化运行、结构化异常提取、AI 辅助日志分析和 Linux 定时部署。"
+description: "基于 Shell、Python、Nginx 日志分析、Docker、AI 分析、数据脱敏、Webhook 通知和只读 Dashboard 构建的轻量级服务器巡检工具。"
+projectDescription: "基于 Shell、Python、Docker 与 Linux 运维工具链构建一套轻量级服务器巡检与日志分析工具，覆盖网站可用性检查、Nginx 服务状态检查、系统资源巡检、Nginx access.log 分析、异常请求识别、Markdown 巡检日报生成、容器化运行、结构化异常提取、AI 辅助日志分析、敏感信息脱敏、多 AI Provider 配置、风险通知、只读 Web Dashboard 和 Linux 定时部署。"
 mainWork:
   - "编写 Shell 健康检查脚本，检查网站 HTTP 状态码、Nginx 服务状态、磁盘使用率和内存使用率。"
   - "配置 crontab 定时任务，实现巡检脚本按固定周期自动执行，并将结果写入日志文件。"
@@ -14,17 +14,19 @@ mainWork:
   - "识别 .php、wp-content、admin、.env、.git 等常见扫描特征，用于区分正常访问、失效链接和自动化扫描请求。"
   - "编写 Python 报告生成器，读取健康检查日志，统计 OK、WARNING、ERROR 数量，提取异常项并生成按日期命名的 Markdown 日报。"
   - "准备固定样本日志和自动测试脚本，验证日志分析结果和报告生成结果是否符合预期，避免后续修改破坏统计逻辑。"
-  - "接入 GitHub Actions，在每次 push 或 Pull Request 时自动执行 Shell 语法检查、日志分析测试、Python 语法检查和报告生成测试。"
-  - "编写 Dockerfile 与 compose.yaml，将 Python 日报生成器封装为一次性运行的容器任务，并通过挂载 logs 与 reports 目录读写运行数据。"
-  - "补充 Docker 自动测试，验证镜像构建、容器运行、报告生成、挂载目录和时区配置是否符合预期。"
+  - "接入 GitHub Actions，在每次 push 或 Pull Request 时自动执行 Shell、Python、Docker 与 AI 流水线相关检查。"
+  - "编写 Dockerfile 与 compose.yaml，将 Python 日报生成器和 AI 分析流水线封装为可复用的容器任务。"
   - "编写结构化异常提取脚本，从健康检查日志中提取 WARNING / ERROR，按磁盘、内存、服务状态、可用性和未知类型进行分类，并输出 provider-neutral JSON。"
   - "设计 AI 日志分析 Prompt 与响应 JSON Schema，限制输出结构、风险等级、异常类别、置信度和人工复核字段。"
-  - "接入 DeepSeek API，基于结构化异常 JSON 生成符合 Schema 的日志分析结果。"
+  - "接入 DeepSeek API，并通过统一 Provider 配置支持 OpenAI 和自定义 OpenAI-compatible 服务。"
+  - "编写敏感信息脱敏模块，在发送 AI 前对 URL、IP、主机名、邮箱和 Linux 路径进行占位符替换。"
   - "编写 AI Markdown 报告渲染脚本，将通过验证的 AI 分析结果转换为人工可读的排查报告。"
-  - "编写一键 AI 巡检流水线，将普通日报、异常提取、DeepSeek 分析、Schema 校验和 AI Markdown 报告串联为单次运行流程。"
+  - "编写一键 AI 巡检流水线，将普通日报、异常提取、AI 分析、Schema 校验、通知发送和 AI Markdown 报告串联为单次运行流程。"
   - "提供 cron 定时入口脚本，通过外部环境文件加载密钥，并使用 flock 防止定时任务重叠执行。"
-  - "补充 Linux 服务器部署文档和 Docker Compose AI profile，支持原生 Python 与容器化两种运行方式。"
-projectResult: "完成一套可持续迭代的服务器巡检、Nginx 日志分析、Markdown 日报生成、Docker 化运行、结构化异常提取、AI 辅助日志分析与定时运行工具雏形。当前项目已经具备 Shell 巡检、日志分析、Python 报告、容器化任务、固定样本测试、GitHub Actions 自动验证、DeepSeek API 调用、JSON Schema 响应校验、AI Markdown 报告生成、一键 AI 流水线和 Linux cron 部署能力。"
+  - "支持按风险阈值发送 generic、Slack 或 Discord Webhook 通知，通知内容只包含风险摘要、Finding 数量和本地报告路径。"
+  - "编写 Nginx JSON 分析器和只读 Web Dashboard，用于展示巡检概览、异常列表、AI 风险、排查步骤、状态码分布和 Top IP。"
+  - "补充 Linux 服务器部署文档和 Docker Compose profile，支持原生 Python 与容器化两种运行方式。"
+projectResult: "完成一套轻量级服务器巡检、Nginx 日志分析、Markdown 日报生成、Docker 化运行、结构化异常提取、AI 辅助日志分析、敏感信息脱敏、风险通知、只读 Dashboard 与定时运行工具。当前项目已经具备 Shell 巡检、日志分析、Python 报告、容器化任务、固定样本测试、GitHub Actions 自动验证、DeepSeek / OpenAI-compatible Provider 调用、JSON Schema 响应校验、AI Markdown 报告生成、一键 AI 流水线、Webhook 通知、Web Dashboard 和 Linux cron 部署能力。"
 highlights:
   - "Shell 健康检查脚本已完成基础版本"
   - "Nginx access.log 分析脚本已完成第一版"
@@ -34,9 +36,13 @@ highlights:
   - "DeepSeek AI 日志分析链路已完成基础版本"
   - "AI 分析结果 JSON Schema 校验与 Markdown 渲染已完成基础版本"
   - "一键 AI 巡检流水线已完成基础版本"
+  - "敏感信息脱敏模块已完成基础版本"
+  - "多 AI Provider 配置已完成基础版本"
+  - "Webhook 风险通知已完成基础版本"
+  - "只读 Web Dashboard 与 Nginx JSON 统计已完成基础版本"
   - "已提供 Linux 部署文档、外置密钥配置和 cron 定时入口"
-  - "已加入固定样本日志与 Shell / Python 自动测试"
-  - "已接入 GitHub Actions 自动执行 Shell、Python、Docker 与 AI 流水线检查"
+  - "已加入固定样本日志与 Shell / Python / Docker 自动测试"
+  - "已接入 GitHub Actions 自动执行 Shell、Python、Docker、AI 流水线和 Dashboard 数据加载检查"
 completedStages:
   - name: "v1：Shell 服务器健康检查"
     items:
@@ -89,16 +95,24 @@ completedStages:
       - "支持在无异常时跳过 API 调用，避免不必要的外部请求"
       - "支持使用本地离线响应测试完整流水线，避免测试依赖网络和 API 额度"
       - "编写 scripts/run-daily-ai-analysis.sh，作为 cron 定时任务入口"
-      - "通过 /etc/server-sentinel/server-sentinel.env 外置 DeepSeek API Key 和运行参数"
+      - "通过 /etc/server-sentinel/server-sentinel.env 外置 API Key 和运行参数"
       - "使用 flock 防止上一次 AI 巡检尚未结束时重复启动"
       - "在 Docker Compose 中加入 ai-pipeline profile，避免普通容器任务误触发 AI API"
       - "编写 docs/deployment.md，整理 Ubuntu 服务器部署、密钥配置、cron 和 Docker 运行方式"
+  - name: "v7：安全增强、多 Provider、通知与 Dashboard"
+    items:
+      - "编写 src/redact_sensitive_data.py，在发送 AI 前脱敏 URL、IP、主机名、邮箱和 Linux 绝对路径"
+      - "编写 src/ai_providers.py，支持 DeepSeek、OpenAI 和自定义 OpenAI-compatible Provider"
+      - "编写 src/send_notification.py，支持按风险阈值发送 generic、Slack 或 Discord Webhook"
+      - "编写 src/analyze_nginx_log.py，生成 Dashboard 使用的 Nginx JSON 统计"
+      - "编写 src/serve_dashboard.py 和 dashboard/ 静态页面，展示巡检概览、异常列表、AI 分析结果、状态码分布和 Top IP"
+      - "补充 tests/test_security_and_providers.py 与 tests/test_nginx_json_and_dashboard.py，验证脱敏、Provider 配置、Webhook、Nginx JSON 和 Dashboard 数据加载"
 nextStages:
-  - "整理 Dashboard 展示页，集中展示巡检概览、异常列表、AI 分析结果和日志统计"
-  - "整理 README、示例输入、示例输出和项目演示说明"
-  - "增加敏感信息脱敏流程，避免真实主机名、IP、路径和内部服务信息进入外部 API"
-  - "抽象 Provider 配置，在保持输入输出 Schema 不变的前提下支持替换 AI 服务"
-  - "补充异常通知能力，将关键风险通过邮件、企业微信或 Telegram 发送给维护者"
+  - "补充真实运行截图和示例报告，完善项目展示材料"
+  - "增加部署环境的实际运行记录和异常案例复盘"
+  - "根据真实使用情况优化 Dashboard 交互、报告字段和异常分类规则"
+  - "视需要增加身份认证或内网访问控制，避免 Dashboard 暴露到公网"
+  - "评估接入 Prometheus / Grafana 或系统指标采集"
 skills:
   - "Linux"
   - "Shell"
@@ -113,13 +127,21 @@ skills:
   - "JSON Schema"
   - "Prompt Engineering"
   - "DeepSeek API"
+  - "OpenAI-compatible API"
+  - "Webhook"
+  - "Dashboard"
+  - "数据脱敏"
+  - "Provider 抽象"
+  - "HTML"
+  - "CSS"
+  - "JavaScript"
   - "cron"
   - "flock"
   - "unittest"
 ---
 
-ServerSentinel 是一套轻量级服务器巡检与 Nginx 日志分析工具，主要用于检查网站可用性、服务运行状态、系统资源使用情况，并对 Nginx 访问日志和健康检查日志中的异常现象进行基础识别。
+ServerSentinel 是一套轻量级服务器巡检与 Nginx 日志分析工具，主要用于检查网站可用性、服务运行状态、系统资源使用情况，并对 Nginx 访问日志和健康检查日志中的异常现象进行基础识别、结构化整理、报告生成和可视化展示。
 
-项目由 Shell 巡检脚本、Nginx 日志分析脚本、Python 报告生成器、Docker 运行环境、AI 分析模块、cron 定时入口和自动化测试流程组成。Shell 脚本负责采集运行状态，日志分析脚本负责提取访问统计与异常特征，Python 模块负责生成 Markdown 日报、结构化 JSON 数据和 AI 分析报告。
+项目由 Shell 巡检脚本、Nginx 日志分析脚本、Python 报告生成器、Docker 运行环境、AI 分析模块、敏感信息脱敏模块、Webhook 通知模块、cron 定时入口、只读 Web Dashboard 和自动化测试流程组成。Shell 脚本负责采集运行状态，日志分析脚本负责提取访问统计与异常特征，Python 模块负责生成 Markdown 日报、结构化 JSON 数据、AI 分析报告和 Dashboard 数据。
 
-当前版本已覆盖 HTTP 状态检查、Nginx 服务检查、磁盘与内存巡检、访问日志统计、扫描请求识别、巡检日报生成、容器化运行、DeepSeek AI 日志分析、JSON Schema 响应校验、一键 AI 流水线、Linux 定时部署和 GitHub Actions 自动验证等功能。
+当前版本已覆盖 HTTP 状态检查、Nginx 服务检查、磁盘与内存巡检、访问日志统计、扫描请求识别、巡检日报生成、容器化运行、DeepSeek / OpenAI-compatible AI 日志分析、JSON Schema 响应校验、敏感信息脱敏、Webhook 风险通知、一键 AI 流水线、只读 Dashboard、Linux 定时部署和 GitHub Actions 自动验证等功能。
