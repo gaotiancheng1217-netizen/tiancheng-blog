@@ -1,8 +1,8 @@
 ---
 title: "ServerSentinel 项目开发复盘：从服务器巡检到 AI 日志分析"
-published: 2026-07-24
-updated: 2026-07-24
-description: "记录 ServerSentinel 轻量级服务器巡检项目的开发过程，包括 Shell 健康检查、Nginx 日志分析、Python 报告生成、Docker 化运行、结构化异常提取、DeepSeek AI 分析和自动化测试。"
+published: 2026-07-25
+updated: 2026-07-25
+description: "记录 ServerSentinel 轻量级服务器巡检项目的开发过程，包括 Shell 健康检查、Nginx 日志分析、Python 报告生成、Docker 化运行、结构化异常提取、DeepSeek AI 分析、定时流水线和自动化测试。"
 tags:
   [
     "项目复盘",
@@ -22,7 +22,7 @@ draft: false
 
 这是一篇小工具开发的复盘，用来记录 ServerSentinel 从一个简单想法逐步变成可运行工具的过程。
 
-此工具主要作用是把服务器巡检、日志分析、定时任务、报告生成、容器化运行、异常结构化提取、AI 辅助分析和自动化验证串在一起。
+此工具主要作用是把服务器巡检、日志分析、定时任务、报告生成、容器化运行、异常结构化提取、AI 辅助分析、定时流水线和自动化验证串在一起。
 
 ![ServerSentinel 整体处理流程](/assets/images/projects/server-sentinel/flow.svg)
 
@@ -40,6 +40,8 @@ ServerSentinel 的目标是做一个轻量级服务器巡检与日志分析工�
 - 生成每日 Markdown 报告；
 - 将异常日志整理为结构化 JSON；
 - 基于 DeepSeek API 生成可复核的 AI 分析报告；
+- 使用一键流水线串联日报、异常提取、AI 分析和 Markdown 报告；
+- 通过 cron 和外置环境文件支持 Linux 服务器定时运行；
 - 使用自动化测试确保脚本修改后不会破坏原有功能。
 
 这个项目的重点不是做一个功能特别大的平台，而是把几个常见的服务器维护动作串成完整流程：看系统状态、读日志、写脚本、生成报告，再用自动化检查保证脚本没有被改坏。
@@ -265,6 +267,61 @@ src/render_ai_report.py
 
 这里需要记住的是：AI 分析模块不应该直接替代人工判断。它更适合负责整理线索、归纳异常、给出安全的排查顺序。真正修改配置、重启服务或调整安全策略之前，仍然需要人工确认。
 
+## 第十阶段：AI 巡检流水线自动化与部署
+
+完成 DeepSeek 分析模块后，项目继续把多个分散命令整理成一条完整流水线。
+
+在这一阶段之前，如果要完成一次 AI 巡检，需要依次执行：
+
+```text
+生成普通日报
+-> 提取异常 JSON
+-> 调用 DeepSeek 分析
+-> 校验 AI JSON
+-> 渲染 AI Markdown 报告
+```
+
+这些步骤虽然都能单独运行，但手动串联容易漏步骤，也不适合放进定时任务。因此项目新增了：
+
+```text
+src/run_ai_pipeline.py
+scripts/run-daily-ai-analysis.sh
+config/server-sentinel.env.example
+docs/deployment.md
+```
+
+`src/run_ai_pipeline.py` 是 Python 侧的一键流水线入口。它会读取健康检查日志，生成普通 Markdown 日报，提取异常 JSON，并在存在异常时继续调用 AI 分析模块。AI 返回结果通过 JSON Schema 验证后，再渲染成 Markdown 报告。
+
+这一设计保留了一个重要边界：没有异常时不调用 AI API；有异常但没有配置 API Key 时，普通日报和异常 JSON 仍然会生成，程序再明确返回错误。这样可以避免因为外部 API 配置问题导致本地巡检结果完全丢失。
+
+`scripts/run-daily-ai-analysis.sh` 是给 Linux `cron` 调用的 Shell 入口。它负责加载外部环境文件、检查 Python 解释器、检查健康检查日志是否存在，并使用 `flock` 防止上一次任务还没结束时重复启动。
+
+密钥配置不放在仓库中，而是放在服务器的独立配置文件中：
+
+```text
+/etc/server-sentinel/server-sentinel.env
+```
+
+示例文件位于：
+
+```text
+config/server-sentinel.env.example
+```
+
+这种做法可以把代码和运行环境分开：仓库保存脚本、测试和示例配置，真实服务器保存 API Key、日志路径、报告目录和锁文件路径。
+
+Docker Compose 也增加了独立的 AI profile：
+
+```bash
+docker compose --profile ai run --rm ai-pipeline
+```
+
+AI 服务不会在普通 `docker compose run report-generator` 时自动启动，避免一次普通报告生成误触发外部 API 请求。容器中日志目录仍然只读挂载，报告目录可写，API Key 只在运行时通过环境变量注入。
+
+最后，`docs/deployment.md` 整理了 Ubuntu 服务器部署流程，包括依赖安装、仓库克隆、Python 虚拟环境、密钥文件权限、手动验证、cron 配置、Docker 运行方式和部署后的只读检查命令。
+
+这一阶段的重点不是新增某一个单点功能，而是把已经完成的模块整理成可定时、可部署、可验证的运行链路。
+
 ## 开发过程中遇到的问题
 
 ### 1. 日志里出现大量陌生路径
@@ -394,13 +451,19 @@ Shell 很适合快速完成任务，但如果没有结构，脚本会很快变�
 - Prompt 需要明确区分“可信指令”和“不可信日志数据”；
 - API Key 应通过环境变量读取，不应写入代码、配置文件或 Git 仓库；
 - AI 分析结果应保留人工复核边界，避免把模型输出直接当作操作指令；
+- 一键流水线适合把多个稳定步骤串成固定执行流程，减少手动漏步骤；
+- `flock` 可以防止定时任务重叠执行，避免多个巡检任务同时写同一批报告；
+- 生产环境密钥应放在仓库外部，例如 `/etc/server-sentinel/server-sentinel.env`；
+- 配置文件权限应尽量收紧，例如只允许文件所有者读取和修改；
+- Docker Compose profile 可以把普通任务和 AI API 任务分开，避免误触发外部服务调用；
+- 部署文档应记录依赖安装、密钥配置、定时任务、手动验证和只读排查命令；
 - 测试样本可以让脚本修改更安全；
 - GitHub Actions 可以在代码提交后自动执行 Shell、Python 和 Docker 检查；
 - 运维开发的核心不是写一次命令，而是把流程沉淀成可复用工具。
 
 ## 项目阶段总结
 
-目前 ServerSentinel 已经完成了六个主要能力：
+目前 ServerSentinel 已经完成了七个主要能力：
 
 ```text
 Shell 健康检查
@@ -409,16 +472,17 @@ Python Markdown 报告生成
 Docker 化报告生成器
 结构化异常提取
 DeepSeek AI 日志分析与 Markdown 报告生成
+一键 AI 巡检流水线与 Linux 定时部署
 ```
 
-同时，项目已经接入自动化测试流程，能够在提交代码后自动检查 Shell、Python、Docker 和 AI 分析相关功能。
+同时，项目已经接入自动化测试流程，能够在提交代码后自动检查 Shell、Python、Docker、AI 分析和流水线编排相关功能。
 
 后续可以继续往几个方向推进：
 
-- 增加配置文件，避免把参数写死在脚本里；
+- 增加 Dashboard 页面，展示巡检概览、异常列表、AI 分析结果和日志统计；
 - 增加邮件、企业微信或 Telegram 通知；
 - 接入更完整的监控指标；
 - 增加敏感信息脱敏流程；
 - 抽象 AI Provider 配置，在保持输入输出结构不变的情况下替换不同模型服务。
 
-回头看这个项目，它把 Linux 命令、Shell、Nginx 日志、Python、Docker、CI 和 AI 辅助分析串成了一个实际流程。它不是单个知识点的堆叠，而是围绕“服务器状态如何被检查、记录、分析、封装、验证和辅助解释”这个问题逐步展开的。
+回头看这个项目，它把 Linux 命令、Shell、Nginx 日志、Python、Docker、CI、AI 辅助分析和定时部署串成了一个实际流程。它不是单个知识点的堆叠，而是围绕“服务器状态如何被检查、记录、分析、封装、验证、辅助解释和周期性运行”这个问题逐步展开的。
