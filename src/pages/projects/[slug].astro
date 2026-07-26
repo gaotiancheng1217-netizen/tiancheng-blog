@@ -165,20 +165,22 @@ const formatDate = (date: Date) => date.toISOString().slice(0, 10);
 		))}
 	</section>
 
-	<section class="mt-6 card-base rounded-(--radius-large) p-7">
-		<h2 class="mb-5 flex items-center gap-2 text-2xl font-bold">
-			<Icon name="material-symbols:rocket-launch-rounded" class="text-(--primary)" />
-			下一阶段计划
-		</h2>
-		<div class="grid gap-4 md:grid-cols-3">
-			{project.data.nextStages.map((stage, index) => (
-				<div class="rounded-2xl bg-(--btn-regular-bg) p-5">
-					<div class="mb-3 flex h-9 w-9 items-center justify-center rounded-full bg-(--primary) font-bold text-white">
-						{index + 3}
+	{project.data.nextStages.length > 0 && (
+		<section class="mt-6 card-base rounded-(--radius-large) p-7">
+			<h2 class="mb-5 flex items-center gap-2 text-2xl font-bold">
+				<Icon name="material-symbols:rocket-launch-rounded" class="text-(--primary)" />
+				下一阶段计划
+			</h2>
+			<div class="grid gap-4 md:grid-cols-3">
+				{project.data.nextStages.map((stage, index) => (
+					<div class="rounded-2xl bg-(--btn-regular-bg) p-5">
+						<div class="mb-3 flex h-9 w-9 items-center justify-center rounded-full bg-(--primary) font-bold text-white">
+							{index + 3}
+						</div>
+						<p class="leading-7 text-neutral-600 dark:text-neutral-300">{stage}</p>
 					</div>
-					<p class="leading-7 text-neutral-600 dark:text-neutral-300">{stage}</p>
-				</div>
-			))}
-		</div>
-	</section>
+				))}
+			</div>
+		</section>
+	)}
 </MainGridLayout>
