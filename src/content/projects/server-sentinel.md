@@ -107,12 +107,6 @@ completedStages:
       - "编写 src/analyze_nginx_log.py，生成 Dashboard 使用的 Nginx JSON 统计"
       - "编写 src/serve_dashboard.py 和 dashboard/ 静态页面，展示巡检概览、异常列表、AI 分析结果、状态码分布和 Top IP"
       - "补充 tests/test_security_and_providers.py 与 tests/test_nginx_json_and_dashboard.py，验证脱敏、Provider 配置、Webhook、Nginx JSON 和 Dashboard 数据加载"
-nextStages:
-  - "补充真实运行截图和示例报告，完善项目展示材料"
-  - "增加部署环境的实际运行记录和异常案例复盘"
-  - "根据真实使用情况优化 Dashboard 交互、报告字段和异常分类规则"
-  - "视需要增加身份认证或内网访问控制，避免 Dashboard 暴露到公网"
-  - "评估接入 Prometheus / Grafana 或系统指标采集"
 skills:
   - "Linux"
   - "Shell"
