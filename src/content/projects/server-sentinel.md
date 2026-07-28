@@ -4,7 +4,7 @@ subtitle: "轻量级服务器巡检与 Nginx 日志分析工具"
 status: "阶段完成"
 progress: 100
 updated: 2026-07-25
-repositoryUrl: "https://github.com/gaotiancheng1217-netizen/server-sentinel"
+repositoryUrl: "https://github.com/gaotiancheng1217/server-sentinel"
 description: "基于 Shell、Python、Nginx 日志分析、Docker、AI 分析、数据脱敏、Webhook 通知和只读 Dashboard 构建的轻量级服务器巡检工具。"
 projectDescription: "基于 Shell、Python、Docker 与 Linux 运维工具链构建一套轻量级服务器巡检与日志分析工具，覆盖网站可用性检查、Nginx 服务状态检查、系统资源巡检、Nginx access.log 分析、异常请求识别、Markdown 巡检日报生成、容器化运行、结构化异常提取、AI 辅助日志分析、敏感信息脱敏、多 AI Provider 配置、风险通知、只读 Web Dashboard 和 Linux 定时部署。"
 mainWork:

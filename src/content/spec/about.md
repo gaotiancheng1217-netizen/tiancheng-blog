@@ -18,7 +18,7 @@
 
 **🏠 我的博客： [https://tiancheng-blog.com](https://tiancheng-blog.com)**
 
-**⭐ GitHub： [gaotiancheng1217-netizen](https://github.com/gaotiancheng1217-netizen)**
+**⭐ GitHub： [gaotiancheng1217](https://github.com/gaotiancheng1217)**
 
 **📧 Email： [gaotiancheng1217@gmail.com](mailto:gaotiancheng1217@gmail.com)**
 

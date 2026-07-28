@@ -6,10 +6,10 @@
   "homepage": "https://tiancheng-blog.com",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/gaotiancheng1217-netizen/tiancheng-blog.git"
+    "url": "git+https://github.com/gaotiancheng1217/tiancheng-blog.git"
   },
   "bugs": {
-    "url": "https://github.com/gaotiancheng1217-netizen/tiancheng-blog/issues"
+    "url": "https://github.com/gaotiancheng1217/tiancheng-blog/issues"
   },
   "scripts": {
     "dev": "astro dev",
